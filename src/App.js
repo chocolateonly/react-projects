@@ -1,59 +1,19 @@
 import React, {Component} from 'react';
 import './App.css';
-import {Tabs, Card, Icon, Select, Row, Col, Affix, Button} from 'antd';
-
+import {Tabs, Card, Icon, Select,Button, Modal,Form,Input} from 'antd';
+const {TextArea}=Input;
 const {TabPane} = Tabs;
 const {Meta} = Card;
 const {Option} = Select;
-const tabs = ['未', '已', '到期'];
+const tabs = ['未出租', '已出租', '快到期'];
 
 class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      data: [
-        {
-          id: 1,
-          houseType: '1.1',
-          owner: 'hh',
-          tel: '123342',
-          address: '路',
-          status: '空',
-          rentOutStartTime: '',
-          rentOutEndTime: ''
-        },
-        {
-          id: 2,
-          houseType: '1.2',
-          owner: 'aahh',
-          tel: '1233546542',
-          address: '路',
-          status: '空',
-          rentOutStartTime: '',
-          rentOutEndTime: ''
-        },
-        {
-          id: 2,
-          houseType: '1.2',
-          owner: 'aahh',
-          tel: '1233546542',
-          address: '路',
-          status: '空',
-          rentOutStartTime: '',
-          rentOutEndTime: ''
-        },
-        {
-          id: 2,
-          houseType: '1.2',
-          owner: 'aahh',
-          tel: '1233546542',
-          address: '路',
-          status: '空',
-          rentOutStartTime: '',
-          rentOutEndTime: ''
-        }
-      ],
+      data: [],
       loading: false,
+      visible:false
     }
   }
 
@@ -72,15 +32,43 @@ class App extends Component {
   onSearch = () => {
 
   };
+  openAddModal = () => {
+this.setState({visible:true})
+  };
+  handleOk=()=>{
+    this.setState({visible:false})
+  };
+  handleCancel=()=>{
+    this.setState({visible:false})
+  };
+  getList = () => {
+    fetch('/api/house/list', {
+      method: 'GET',
+    })
+      .then(response => response.json())
+      .then(res => {
+        //console.log(res)
+        this.setState({data: res.data})
+      })
+      .catch(err => console.log(err))
+  };
 
+  componentDidMount() {
+    this.getList()
+  }
+  handleSubmit=()=>{
+
+  };
   render() {
     const {data} = this.state;
 
     return (
       <div className="App">
         <Tabs defaultActiveKey="1" onChange={this.tabsCallback} style={{height: '100%'}}>
-          <TabPane tab={tabs[0]} key="1" style={{height: '100%'}}>
-            <div style={{display:'flex',flexDirection:'column',flex:1, overflow: 'scroll'}}>
+          <TabPane tab={tabs[0]} key="1">
+            <div className="tab-view">
+
+              <Button className={'add-btn-fixed'} onClick={this.openAddModal}>＋</Button>
 
 
               <div className={'top-tools'} style={{margin: '0 10px 10px 10px'}}>
@@ -102,31 +90,58 @@ class App extends Component {
                   <Option value="tom">Tom</Option>
                 </Select>
               </div>
-
-              {
-                data.map((item, index) => {
-                  return <Card
-                    key={'card' + index}
-                    className={'card'}
-                    style={{margin: '0 10px 10px 10px'}}
-                    actions={[<Icon type="edit"/>, <Icon type="ellipsis"/>]}
-                  >
-                    <Meta
-                      title={item.houseType}
-                      description={item.address}
-                    />
-                    <a href={`tel:${item.tel}`}>{item.tel}</a>
-                  </Card>
-                })
-              }
+              <div style={{display: 'flex', flexDirection: 'column', flex: 1, overflowY: 'scroll'}}>
+                {
+                  data.map((item, index) => {
+                    return <Card
+                      key={'card' + index}
+                      className={'card'}
+                      style={{margin: '0 10px 10px 10px'}}
+                      actions={[<Icon type="edit"/>, <Icon type="ellipsis"/>]}
+                    >
+                      <Meta
+                        title={item.houseType}
+                        description={item.address}
+                      />
+                      <a href={`tel:${item.tel}`}>{item.tel}</a>
+                    </Card>
+                  })
+                }
+              </div>
 
             </div>
 
-            <Affix offsetBottom={20} onChange={affixed => console.log(affixed)}>
-              <Button>120px to affix top</Button>
-            </Affix>
+            <Modal
+              title="添加"
+              visible={this.state.visible}
+              onOk={this.handleOk}
+              onCancel={this.handleCancel}
+            >
+              <Form layout="vertical">
+                <Form.Item label="联系人">
+                  <Input />
+                </Form.Item>
+                <Form.Item label="联系方式">
+                  <Input />
+                </Form.Item>
+                <Form.Item label="户型">
+                  <Input />
+                </Form.Item>
+                <Form.Item label="地址">
+                  <Input />
+                </Form.Item>
+                <Form.Item label="出租时间">
+                  <Input />
+                </Form.Item>
+                <Form.Item label="备注">
+                  <TextArea placeholder="" autosize />
+                </Form.Item>
+              </Form>
+
+            </Modal>
 
           </TabPane>
+
           <TabPane tab={tabs[1]} key="2">
             Content of Tab Pane 2
           </TabPane>
