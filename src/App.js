@@ -1,7 +1,9 @@
 import React, {Component} from 'react';
 import './App.css';
-import {Tabs, Card, Icon, Select,Button, Modal,Form,Input} from 'antd';
+import {Tabs, Card, Icon, Select,Button, Modal,Form,Input,DatePicker} from 'antd';
+import locale from 'antd/es/date-picker/locale/zh_CN';
 const {TextArea}=Input;
+const {RangePicker}=DatePicker;
 const {TabPane} = Tabs;
 const {Meta} = Card;
 const {Option} = Select;
@@ -13,14 +15,58 @@ class App extends Component {
     this.state = {
       data: [],
       loading: false,
-      visible:false
+      visible:false,
+
+      startValue: null,
+      endValue: null,
+      endOpen: false,
     }
   }
 
+
+disabledStartDate = startValue => {
+  const { endValue } = this.state;
+  if (!startValue || !endValue) {
+    return false;
+  }
+  return startValue.valueOf() > endValue.valueOf();
+};
+
+disabledEndDate = endValue => {
+  const { startValue } = this.state;
+  if (!endValue || !startValue) {
+    return false;
+  }
+  return endValue.valueOf() <= startValue.valueOf();
+};
+
+onChange = (field, value) => {
+  this.setState({
+    [field]: value,
+  });
+};
+
+onStartChange = value => {
+  this.onChange('startValue', value);
+};
+
+onEndChange = value => {
+  this.onChange('endValue', value);
+};
+
+handleStartOpenChange = open => {
+  if (!open) {
+    this.setState({ endOpen: true });
+  }
+};
+
+handleEndOpenChange = open => {
+  this.setState({ endOpen: open });
+};
   tabsCallback = key => {
 
   };
-  onChange = () => {
+  onSelectChange = () => {
 
   };
   onFocus = () => {
@@ -60,7 +106,11 @@ this.setState({visible:true})
 
   };
   render() {
-    const {data} = this.state;
+    const {data,
+      startValue,
+      endValue,
+      endOpen,
+    } = this.state;
 
     return (
       <div className="App">
@@ -77,7 +127,7 @@ this.setState({visible:true})
                   style={{width: '100%'}}
                   placeholder="Select a person"
                   optionFilterProp="children"
-                  onChange={this.onChange}
+                  onChange={this.onSelectChange}
                   onFocus={this.onFocus}
                   onBlur={this.onBlur}
                   onSearch={this.onSearch}
@@ -131,7 +181,31 @@ this.setState({visible:true})
                   <Input />
                 </Form.Item>
                 <Form.Item label="出租时间">
-                  <Input />
+                  <DatePicker
+                    style={{width:'100%'}}
+                    popupStyle={{width:'100%'}}
+                    locale={locale}
+                    disabledDate={this.disabledStartDate}
+                    format="YYYY-MM-DD"
+                    value={startValue}
+                    placeholder="Start"
+                    onChange={this.onStartChange}
+                    onOpenChange={this.handleStartOpenChange}
+                  />
+                </Form.Item>
+                <Form.Item label="到期时间">
+                  <DatePicker
+                    style={{width:'100%'}}
+                    popupStyle={{width:'100%'}}
+                    locale={locale}
+                    disabledDate={this.disabledEndDate}
+                    format="YYYY-MM-DD"
+                    value={endValue}
+                    placeholder="End"
+                    onChange={this.onEndChange}
+                    open={endOpen}
+                    onOpenChange={this.handleEndOpenChange}
+                  />
                 </Form.Item>
                 <Form.Item label="备注">
                   <TextArea placeholder="" autosize />
